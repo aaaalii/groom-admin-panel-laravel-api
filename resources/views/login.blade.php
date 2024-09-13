@@ -3,6 +3,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         body {
             font-family: 'Montserrat', sans-serif;
@@ -33,12 +34,13 @@
                     <h2 class="text-2xl font-bold mb-2">Login</h2>
                     <p class="text-gray-600">Log in to your account</p>
                 </div>
-                <form>
+                <form id="loginForm">
+                    @csrf
                     <div class="mb-4">
                         <div class="relative">
                             <input
                                 class="w-full px-4 py-2 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
-                                placeholder="Enter Email" type="email" />
+                                placeholder="Enter Email" type="email" id="email"/>
                             <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
                         </div>
                     </div>
@@ -47,7 +49,7 @@
                             <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
                             <input
                                 class="w-full px-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
-                                placeholder="Password" type="password" />
+                                placeholder="Password" type="password" id="password"/>
                             <i class="fas fa-eye absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
                         </label>
                     </div>
@@ -66,4 +68,39 @@
         </div>
     </div>
 </body>
+
+<script>
+     document.getElementById('loginForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        // Making the API call using Fetch
+        fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message === "Login successful") {
+                window.location.href = data.route;
+            } else {
+                // Login failed
+                document.getElementById('responseMessage').innerHTML = 'Error: ' + data.message;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('responseMessage').innerHTML = 'An error occurred. Please try again.';
+        });
+    });
+</script>
+
 </html>
